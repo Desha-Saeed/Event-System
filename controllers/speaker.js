@@ -1,5 +1,6 @@
 //Model
 const Speaker = require('../models/speaker');
+const { validationResult } = require('express-validator');
 
 // @desc Return all speakers data
 // @route GET /speaker
@@ -52,6 +53,13 @@ const getOneSpeaker = async (req, res) => {
 
 const addNewSpeaker = async (req, res) => {
   try {
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const speaker = await Speaker.create(req.body);
 
     res.status(200).json({
@@ -76,6 +84,13 @@ const addNewSpeaker = async (req, res) => {
 
 const updateSpeaker = async (req, res) => {
   try {
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const speaker = await Speaker.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });

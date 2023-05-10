@@ -3,6 +3,8 @@ const express = require('express');
 const connectDB = require('./config/db_config');
 require('dotenv').config();
 
+const cors = require('cors');
+
 //My file imports
 const speakerRoutes = require('./routes/speaker');
 const studentRoutes = require('./routes/student');
@@ -13,6 +15,7 @@ const app = express();
 const PORT = process.env.PORT;
 
 //middle wares
+app.use(cors());
 app.use(express.json());
 
 //routes

@@ -1,4 +1,5 @@
 //Model
+const { validationResult } = require('express-validator');
 const Student = require('../models/student');
 
 // @desc Return all Students data
@@ -52,7 +53,13 @@ const getOneStudent = async (req, res) => {
 
 const addNewStudent = async (req, res) => {
   try {
-    console.log(req.body);
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: result.array() });
+    }
+
     const student = await Student.create(req.body);
 
     res.status(200).json({
@@ -75,6 +82,13 @@ const addNewStudent = async (req, res) => {
 
 const updateStudent = async (req, res) => {
   try {
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: result.array() });
+    }
+
     const student = await Student.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
@@ -114,10 +128,26 @@ const deleteStudent = async (req, res) => {
   }
 };
 
+const deleteAllStudents = async (req, res) => {
+  try {
+    await Student.deleteMany({});
+
+    res.status(200).json({
+      status: `Deleted All students`,
+    });
+  } catch (error) {
+    res.status(400).json({
+      status: 'Failed',
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   getAllStudents,
   getOneStudent,
   updateStudent,
   addNewStudent,
   deleteStudent,
+  deleteAllStudents,
 };

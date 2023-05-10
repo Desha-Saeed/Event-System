@@ -1,5 +1,6 @@
 //Model
 const Event = require('../models/event');
+const { validationResult } = require('express-validator');
 
 // @desc Return all Events data
 // @route GET /Event
@@ -29,8 +30,7 @@ const getAllEvents = async (req, res) => {
 
 const getOneEvent = async (req, res) => {
   try {
-    const eventData = await eventData
-      .findById(req.params.id)
+    const eventData = await Event.findById(req.params.id)
       .select('-password')
       .select('-__v');
 
@@ -54,7 +54,13 @@ const getOneEvent = async (req, res) => {
 
 const addNewEvent = async (req, res) => {
   try {
-    console.log(req.body);
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const eventData = await Event.create(req.body);
 
     res.status(200).json({
@@ -77,16 +83,23 @@ const addNewEvent = async (req, res) => {
 
 const updateEvent = async (req, res) => {
   try {
+    // check for body data validations
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     const eventData = await Event.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
 
+    console.log(eventData);
+
     res.status(200).json({
       status: 'Success, Event data updated',
       data: {
-        _id: eventData._id,
-        fullname: eventData.fullname,
-        email: eventData.email,
+        eventData,
       },
     });
   } catch (error) {
