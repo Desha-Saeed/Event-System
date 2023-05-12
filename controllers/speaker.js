@@ -1,6 +1,7 @@
 //Model
 const Speaker = require('../models/speaker');
 const { validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
 
 // @desc Return all speakers data
 // @route GET /speaker
@@ -53,11 +54,23 @@ const getOneSpeaker = async (req, res) => {
 
 const addNewSpeaker = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin
+    const token =
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.headers.authorization;
+    const payload = jwt.verify(token, process.env.TOKEN_KEY);
+    if (payload.role !== 'admin') {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
     // check for body data validations
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: result.array() });
     }
 
     const speaker = await Speaker.create(req.body);
@@ -68,6 +81,7 @@ const addNewSpeaker = async (req, res) => {
         _id: speaker._id,
         fullname: speaker.fullname,
         email: speaker.email,
+        image: speaker.image,
       },
     });
   } catch (error) {
@@ -88,7 +102,7 @@ const updateSpeaker = async (req, res) => {
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+      return res.status(400).json({ errors: result.array() });
     }
 
     const speaker = await Speaker.findByIdAndUpdate(req.params.id, req.body, {
@@ -117,6 +131,18 @@ const updateSpeaker = async (req, res) => {
 
 const deleteSpeaker = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin
+    const token =
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.headers.authorization;
+    const payload = jwt.verify(token, process.env.TOKEN_KEY);
+    if (payload.role !== 'admin') {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
     await Speaker.findByIdAndRemove(req.params.id);
 
     res.status(200).json({
