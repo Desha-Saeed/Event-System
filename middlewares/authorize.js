@@ -24,7 +24,7 @@ const userOrAdmin = (user) => {
       req.query.token ||
       req.headers['x-access-token'] ||
       req.headers.authorization;
-    const decodedToken = jwt.verify(token, secret);
+    const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
     const userData = await user.findById(req.params.id);
     if (
       decodedToken.role !== 'admin' &&

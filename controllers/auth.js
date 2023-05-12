@@ -34,7 +34,7 @@ exports.register = (model) => {
 
       // return new Student
       res.status(201).json({
-        status: `User created with role ${role}`,
+        status: `Student created with full name ${user.fullname}`,
       });
     } catch (err) {
       res.status(400).json({
