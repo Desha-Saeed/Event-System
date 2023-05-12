@@ -1,16 +1,23 @@
-module.exports = errorHandler;
+// Error handling Middleware function for logging the error message
+const errorLogger = (error, request, response, next) => {
+  console.log(`error ${error.message}`);
+  next(error); // calling next middleware
+};
 
-function errorHandler(err, req, res, next) {
-  if (typeof err === 'string') {
-    // custom application error
-    return res.status(400).json({ message: err });
-  }
+// Error handling Middleware function reads the error message
+// and sends back a response in JSON format
+const errorResponder = (error, request, response, next) => {
+  response.header('Content-Type', 'application/json');
 
-  if (err.name === 'UnauthorizedError') {
-    // jwt authentication error
-    return res.status(401).json({ message: 'Invalid Token' });
-  }
+  const status = error.status || 400;
+  response.status(status).send(error.message);
+};
 
-  // default to 500 server error
-  return res.status(500).json({ message: err.message });
-}
+// Fallback Middleware function for returning
+// 404 error for undefined paths
+const invalidPathHandler = (request, response, next) => {
+  response.status(404);
+  response.send('invalid path');
+};
+
+module.exports = { errorLogger, errorResponder, invalidPathHandler };

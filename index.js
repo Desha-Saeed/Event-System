@@ -16,6 +16,9 @@ const { login, register } = require('./controllers/auth');
 const Student = require('./models/student');
 const Admin = require('./models/Admin');
 
+//middlewares
+const error = require('./middlewares/errors');
+
 //create app
 const app = express();
 
@@ -44,6 +47,17 @@ app.use('/login', login);
 
 //database connection
 connectDB();
+
+//error handling middlewares
+
+// function defined above (which logs the error)
+app.use(error.errorLogger);
+
+// sends response with the error
+app.use(error.errorResponder);
+
+// function which sends back the response for invalid paths)
+app.use(error.invalidPathHandler);
 
 //listen to server on the port
 app.listen(PORT, () => {
