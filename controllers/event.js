@@ -83,6 +83,18 @@ const addNewEvent = async (req, res) => {
 
 const updateEvent = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin
+    const token =
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.headers.authorization;
+    const payload = jwt.verify(token, process.env.TOKEN_KEY);
+    if (payload.role !== 'admin') {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
     // check for body data validations
     const result = validationResult(req);
 
@@ -93,8 +105,6 @@ const updateEvent = async (req, res) => {
     const eventData = await Event.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-
-    console.log(eventData);
 
     res.status(200).json({
       status: 'Success, Event data updated',
@@ -116,6 +126,18 @@ const updateEvent = async (req, res) => {
 
 const deleteEvent = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin
+    const token =
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.headers.authorization;
+    const payload = jwt.verify(token, process.env.TOKEN_KEY);
+    if (payload.role !== 'admin') {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
     await Event.findByIdAndRemove(req.params.id);
 
     res.status(200).json({

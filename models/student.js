@@ -16,13 +16,13 @@ const StudentSchema = new mongoose.Schema(
     },
     email: {
       type: String,
+      lowercase: true,
       required: 'email address is required',
     },
 
     password: {
       type: String,
       minLength: [6, 'Password must be more than 6 characters'],
-      maxLength: [25, 'Password is too long'],
     },
   },
   { _id: false }

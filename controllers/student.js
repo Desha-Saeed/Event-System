@@ -82,6 +82,21 @@ const addNewStudent = async (req, res) => {
 
 const updateStudent = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin or the student itself
+    const token =
+      req.body.token ||
+      req.query.token ||
+      req.headers['x-access-token'] ||
+      req.headers.authorization;
+    const decodedToken = jwt.verify(token, secret);
+    const studentData = await Student.findById(req.params.id);
+    if (
+      decodedToken.role !== 'admin' &&
+      decodedToken.id !== studentData._id.toString()
+    ) {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
     // check for body data validations
     const result = validationResult(req);
 
@@ -115,6 +130,14 @@ const updateStudent = async (req, res) => {
 
 const deleteStudent = async (req, res) => {
   try {
+    // Check if the user is authenticated as an admin
+    const token = req.headers.authorization;
+    const payload = jwt.verify(token, process.env.TOKEN_KEY);
+    if (payload.role !== 'admin') {
+      res.status(401).json({ message: 'Unauthorized' });
+      return;
+    }
+
     await Student.findByIdAndRemove(req.params.id);
 
     res.status(200).json({
